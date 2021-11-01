@@ -10,7 +10,6 @@ import helmet from 'helmet';
 import { sessionConfig } from './config/express-session.js';
 
 import authRouter from './routes/auth.js';
-import securityRouter from './routes/securities.js';
 import usersRouter from './routes/users.js';
 
 const port = process.env.PORT;
@@ -26,7 +25,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/auth', authRouter);
-app.use('/securities', securityRouter);
 app.use('/users', usersRouter);
 
 app.listen(port, () => console.log(`http://localhost:${port}`));
