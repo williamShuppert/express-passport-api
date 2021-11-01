@@ -1,3 +1,4 @@
+'use strict';
 import { Router } from 'express';
 import { Users } from '../models/users.js';
 import { body, validationResult } from 'express-validator';

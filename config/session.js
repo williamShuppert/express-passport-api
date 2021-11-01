@@ -1,3 +1,4 @@
+'use strict';
 import MySQLStore from "express-mysql-session";
 import { pool } from "./mysql.js";
 
