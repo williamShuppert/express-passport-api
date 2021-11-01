@@ -15,6 +15,23 @@ export class User {
         this.securities = undefined;
     }
 
+    setEmail(email) {
+        this.verified_email = false;
+        this.email = email;
+    }
+
+    setPassword(password) {
+        this.password = User.encryptPassword(password);
+    }
+
+    checkPassword(password) {
+        return bcrypt.compareSync(password, this.password);
+    }
+
+    static encryptPassword(password) {
+        return bcrypt.hashSync(password, 12);
+    }
+
     async getSecurities() {
         if (this.securities) return this.securities;
 
@@ -30,40 +47,7 @@ export class User {
         return this.securities.filter(s => securities.includes(s)).length > 0;
     }
 
-    setEmail(email)
-    {
-        this.verified_email = false;
-        this.email = email;
-    }
-
-    setPassword(password)
-    {
-        this.password = User.encryptPassword(password);
-    }
-
-    static encryptPassword(password) {
-        return bcrypt.hashSync(password, 12);
-    }
-
-    async toDTO(security = false)
-    {
-        const dto = {
-            id: this.id,
-            username: this.username,
-            nickname: this.nickname,
-            created_at: this.created_at
-        }
-        if (security) dto.securities = await this.getSecurities();
-        return dto;
-    }
-
-    checkPassword(password)
-    {
-        return bcrypt.compareSync(password, this.password);
-    }
-
-    async save()
-    {
+    async save() {
         const sql = [
             'UPDATE users',
             'SET',
@@ -85,6 +69,17 @@ export class User {
         ]);
 
         return this;
+    }
+
+    async toDTO(security = false) {
+        const dto = {
+            id: this.id,
+            username: this.username,
+            nickname: this.nickname,
+            created_at: this.created_at
+        }
+        if (security) dto.securities = await this.getSecurities();
+        return dto;
     }
 }
 
