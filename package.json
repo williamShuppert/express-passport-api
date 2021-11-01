@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon server.js"
   },
-  "author": "",
+  "author": "William Shuppert",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
