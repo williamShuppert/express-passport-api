@@ -41,3 +41,9 @@ CREATE TABLE securities (
     FOREIGN KEY (security_id) REFERENCES security_descriptions(id)
 );
 ```
+
+## Todo
+* OAuth2 - google
+* PUT   /auth/change-password
+* PUT   /users
+* DEL   /users
