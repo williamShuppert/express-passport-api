@@ -1,7 +1,7 @@
 'use strict';
 import { Router } from 'express';
 import passport from 'passport';
-import { hasSecurity, isAuthed } from '../middleware/auth.js';
+import { isAuthed } from '../middleware/auth.js';
 
 const router = new Router();
 
