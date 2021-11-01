@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { User } from '../models/users.js';
+import { Users } from '../models/users.js';
 import { body, validationResult } from 'express-validator';
 
 const router = new Router();
@@ -18,7 +18,7 @@ router.post('/', [
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const { username, nickname, email, password } = req.body;
-    const user = await User.create({ username, nickname, email, password });
+    const user = await Users.create({ username, nickname, email, password });
     
     req.session.loggedIn = true;
     res.status(200).json(user.toDTO());

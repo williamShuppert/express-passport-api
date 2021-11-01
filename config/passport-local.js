@@ -1,12 +1,12 @@
 'use strict';
 import LocalStrategy from 'passport-local';
-import UsersTable from "../database/users.js";
+import { Users } from '../models/users.js';
 
 export default new LocalStrategy({
         usernameField: 'username',
         passwordField: 'password'
     }, async (username, password, done) => {
-        const user = await UsersTable.getByUsername(username);
+        const user = await Users.getByUsername(username);
 
         if (!user || !user.checkPassword(password))
             return done(null, false, { message: "incorrect credentials" });

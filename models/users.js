@@ -1,6 +1,5 @@
 'use strict';
 import db from '../config/mysql.js';
-import UsersTable from '../database/users.js';
 import bcrypt from 'bcrypt';
 
 export class User {
@@ -12,28 +11,16 @@ export class User {
         this.password = sqlRes.password;
         this.verified_email = sqlRes.verified_email;
         this.created_at = sqlRes.created_at;
-        if (!sqlRes.id)
-        {
-            this.setEmail(sqlRes.nickname);
-            this.setPassword(sqlRes.password);
-        }
-    }
-
-    static async create({ username, nickname, email, password }) {
-        const user = await UsersTable.insert(username, nickname, email, this.encryptPassword(password));
-        return user;
     }
 
     setEmail(email)
     {
-        // if (this.validEmail(email)) throw "invalid email";
         this.verified_email = false;
         this.email = email;
     }
 
     setPassword(password)
     {
-        // this.validPassword(password);
         this.password = User.encryptPassword(password);
     }
 
@@ -100,6 +87,22 @@ export class Users {
         for (let user of sqlRes) {
             this.users.push(new User(user));
         }
+    }
+
+    static async getById(id) {
+        const user = await db('SELECT * FROM users WHERE id = ?', [id], true);
+        return user ? new User(user) : undefined;
+    }
+
+    static async getByUsername(username) {
+        const user = await db('SELECT * FROM users WHERE username = ?', [username], true);
+        return user ? new User(user) : undefined;
+    }
+
+    static async create({ username, nickname, email, password }) {
+        const info = await db('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', [username, nickname, email, password]);
+        const user = new User({ id: info.insertId ,username, nickname, email, password, created_at: Date.now(), verified_email: false });
+        return user;
     }
 
     toDTO() {

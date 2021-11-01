@@ -1,7 +1,7 @@
 'use strict';
 import passport from 'passport';
 import localStrategy from '../config/passport-local.js';
-import UsersTable from '../database/users.js';
+import { Users } from '../models/users.js';
 
 passport.use(localStrategy);
 
@@ -10,6 +10,6 @@ passport.serializeUser((user, done) => {
 });
   
 passport.deserializeUser(async (id, done) => {
-    const user = await UsersTable.getById(id);
+    const user = await Users.getById(id);
     done(null, user);
 });
