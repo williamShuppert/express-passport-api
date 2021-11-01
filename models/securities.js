@@ -18,7 +18,7 @@ export class Securities {
     }
 
     static async get(user_id) {
-        return await db('SELECT security_id, description, username, user_id FROM securities JOIN users ON users.id = securities.user_id JOIN security_descriptions ON securities.security_id = security_descriptions.id WHERE users.id = ?', [user_id]);
+        return await db('SELECT sd.id as security_id, sd.description, if(s.user_id, true, false) as enabled FROM security_descriptions as sd LEFT JOIN securities as s ON s.security_id = sd.id AND s.user_id = 9', [user_id]);
     }
 
     static async assign(user_id, security_id) {

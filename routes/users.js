@@ -29,7 +29,7 @@ router.get('/:id/securities', [
 
     const { id } = req.params;
 
-    res.status(200).json(await Securities.getByUserId(id));
+    res.status(200).json(await Securities.get(id));
 });
 
 router.post('/:id/securities', [
