@@ -79,13 +79,22 @@ router.post('/', [
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const { username, nickname, email, password } = req.body;
-    const user = await Users.create({ username, nickname, email, password });
-    // TODO: catch dup err
-    
-    req.login(user, async err => {
-        if (err) return next(err);
-        res.status(200).json(await user.toDTO());
-    });
+    try {
+        const user = await Users.create({ username, nickname, email, password });
+
+        req.login(user, async err => {
+            if (err) return next(err);
+            res.status(200).json(await user.toDTO());
+        });
+    } catch(err) {
+        if (err === 'username already in use')
+            return res.status(400).json({ message: 'username already in use'});       
+        else if (err === 'email already in use')
+            return res.status(400).json({ message: 'email already in use'});
+
+        console.log(err);
+        return res.sendStatus(500);
+    } 
 });
 
 export default router;

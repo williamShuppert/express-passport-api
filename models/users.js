@@ -64,7 +64,6 @@ export class User {
 
     async save()
     {
-
         const sql = [
             'UPDATE users',
             'SET',
@@ -86,17 +85,6 @@ export class User {
         ]);
 
         return this;
-    
-        // catch (err)
-        // {
-        //     if (err.code === 'ER_DUP_ENTRY')
-        //         if (err.sqlMessage.includes('users.username'))
-        //             throw "username already in use";
-        //         else if (err.sqlMessage.includes('users.email'))
-        //             throw "email already in use";
-        //     throw err;
-        // }
-
     }
 }
 
@@ -120,9 +108,18 @@ export class Users {
 
     static async create({ username, nickname, email, password }) {
         password = User.encryptPassword(password);
-        const info = await db('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', [username, nickname, email, password]);
-        const user = new User({ id: info.insertId ,username, nickname, email, password, created_at: Date.now(), verified_email: false });
-        return user;
+        try {
+            const info = await db('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', [username, nickname, email, password]);
+            const user = new User({ id: info.insertId ,username, nickname, email, password, created_at: Date.now(), verified_email: false });
+            return user;
+        } catch(err) {
+            if (err.code === 'ER_DUP_ENTRY')
+                if (err.sqlMessage.includes('users.username'))
+                    throw "username already in use";
+                else if (err.sqlMessage.includes('users.email'))
+                    throw "email already in use";
+            throw err;
+        }
     }
 
     async toDTO() {
