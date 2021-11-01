@@ -9,7 +9,7 @@ export const sessionConfig = {
     saveUninitialized: false,
     cookie: {
         secure: process.env.NODE_ENV !== 'dev',
-        maxAge: 10000,
+        maxAge: 900000,
         httpOnly: true
     },
     rolling: true,
