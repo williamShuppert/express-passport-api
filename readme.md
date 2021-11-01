@@ -27,4 +27,17 @@ CREATE TABLE users (
     email_verified BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE security_descriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    description VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE securities (
+    user_id INT,
+    security_id INT,
+    PRIMARY KEY (user_id, security_id),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (security_id) REFERENCES security_descriptions(id)
+);
 ```

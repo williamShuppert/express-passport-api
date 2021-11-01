@@ -1,6 +1,7 @@
 'use strict';
 import db from '../config/mysql.js';
 import bcrypt from 'bcrypt';
+import { Securities } from './securities.js';
 
 export class User {
     constructor(sqlRes) {
@@ -11,6 +12,22 @@ export class User {
         this.password = sqlRes.password;
         this.verified_email = sqlRes.verified_email;
         this.created_at = sqlRes.created_at;
+        this.securities = undefined;
+    }
+
+    async getSecurities() {
+        if (this.securities) return this.securities;
+
+        this.securities = await Securities.getByUserId(this.id);
+
+        return this.securities;
+    }
+        
+    async hasSecurity(securities) {
+        if (!this.securities) await this.getSecurities();
+
+        if (parseInt(securities) && this.securities.includes(securities)) return true;
+        return this.securities.filter(s => securities.includes(s)).length > 0;
     }
 
     setEmail(email)
@@ -28,14 +45,16 @@ export class User {
         return bcrypt.hashSync(password, 12);
     }
 
-    toDTO()
+    async toDTO(security = false)
     {
-        return {
+        const dto = {
             id: this.id,
             username: this.username,
             nickname: this.nickname,
             created_at: this.created_at
         }
+        if (security) dto.securities = await this.getSecurities();
+        return dto;
     }
 
     checkPassword(password)
@@ -106,10 +125,10 @@ export class Users {
         return user;
     }
 
-    toDTO() {
+    async toDTO() {
         let users = [];
         for (let user of this.users)
-            users.push(user.toDTO());
+            users.push(await user.toDTO());
         return users;
     }
 }
