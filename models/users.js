@@ -100,6 +100,7 @@ export class Users {
     }
 
     static async create({ username, nickname, email, password }) {
+        password = User.encryptPassword(password);
         const info = await db('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', [username, nickname, email, password]);
         const user = new User({ id: info.insertId ,username, nickname, email, password, created_at: Date.now(), verified_email: false });
         return user;
