@@ -117,6 +117,10 @@ export class Users {
         }
     }
 
+    static async delete(id) {
+        await db('DELETE FROM users WHERE id = ?', [id]);
+    }
+
     async toDTO() {
         let users = [];
         for (let user of this.users)

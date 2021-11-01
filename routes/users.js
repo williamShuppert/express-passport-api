@@ -4,6 +4,7 @@ import { Users } from '../models/users.js';
 import { body, param, validationResult } from 'express-validator';
 import { hasSecurity } from '../middleware/auth.js';
 import { Securities } from '../models/securities.js';
+import passport from 'passport';
 
 const router = new Router();
 
@@ -95,6 +96,14 @@ router.post('/', [
         console.log(err);
         return res.sendStatus(500);
     } 
+});
+
+router.delete('/', passport.authenticate('local'), (req, res) => {
+    Securities.delete(req.user.id);
+    Users.delete(req.user.id);
+
+    req.logout();
+    res.sendStatus(200);
 });
 
 export default router;

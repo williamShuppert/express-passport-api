@@ -46,4 +46,3 @@ CREATE TABLE securities (
 * OAuth2 - google
 * PUT   /auth/change-password
 * PUT   /users
-* DEL   /users

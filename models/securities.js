@@ -17,6 +17,10 @@ export class Securities {
         return securities;
     }
 
+    static async delete(user_id) {
+        return await db('DELETE FROM securities WHERE user_id = ?', [user_id]);
+    }
+
     static async get(user_id) {
         return await db('SELECT sd.id as security_id, sd.description, if(s.user_id, true, false) as enabled FROM security_descriptions as sd LEFT JOIN securities as s ON s.security_id = sd.id AND s.user_id = 9', [user_id]);
     }
