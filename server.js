@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { sessionConfig } from './config/session.js';
+import { sessionConfig } from './config/express-session.js';
 
 import authRouter from './routes/auth.js';
 import securityRouter from './routes/securities.js';
