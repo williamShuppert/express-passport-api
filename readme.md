@@ -4,6 +4,8 @@
 * add required MySQL tables from below
 * ```npm run start``` or ```npm run dev```
 
+* manage google oauth at https://console.cloud.google.com/apis/credentials/consent
+
 ## .env template
 ```
 NODE_ENV = 'dev'
@@ -14,6 +16,9 @@ DB_PASSWORD = ''
 DB_NAME = ''
 
 SESSION_SECRET = ''
+
+GOOGLE_CONSUMER_KEY = ''
+GOOGLE_CONSUMER_SECRET = ''
 ```
 
 ## Required MySQL tables
@@ -39,6 +44,14 @@ CREATE TABLE securities (
     PRIMARY KEY (user_id, security_id),
 	FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (security_id) REFERENCES security_descriptions(id)
+);
+
+CREATE TABLE oauth (
+    user_id INT,
+    id VARCHAR(100),
+    provider VARCHAR(30),
+    PRIMARY KEY (id, provider),
+	FOREIGN KEY (user_id) REFERENCES users(id)
 );
 ```
 

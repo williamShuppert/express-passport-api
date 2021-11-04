@@ -2,8 +2,10 @@
 import passport from 'passport';
 import localStrategy from '../config/passport-local.js';
 import { Users } from '../models/users.js';
+import GoogleStrategy from './passport-google.js';
 
 passport.use(localStrategy);
+passport.use(GoogleStrategy);
 
 passport.serializeUser((user, done) => {
     done(null, user.id);
