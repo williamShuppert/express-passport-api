@@ -10,21 +10,29 @@ export default new GoogleStrategy({
       `http://localhost:${process.env.PORT}/auth/google/callback` :
       `https://tbd/auth/google/callback`
   },
-  async (token, tokenSecret, profile, done) => {
-      // find or create user
-      const user = await OAuth.get('google', profile.id);
-      if (user) return done(null, user);
-      console.log(profile);
+  async (accessToken, refreshToken, profile, done) => {
+    try {
+      // check if oauth is set up with an account
+      const oauth = await OAuth.get('google', profile.id);
 
-      // Users.create({
-      //   username: profile._json.name,
-      //   nickname: profile._json.name,
-      //   email: profile._json.email,
-      //   verified_email: profile._json.email_verified
-      // });
-      //OAuth.insert('google', profile.id);
-      // search for (provider, googleId) // using join
-      // return user or create user
-      done(null, user);
+      // sign user in if oauth is set up
+      if (oauth) {
+        const user = await Users.getById(oauth.user_id);
+        return done(null, user);
+      }
+
+      // create user and set up oauth
+      const username = profile._json.name;
+      const nickname = username;
+      const email = profile._json.email;
+      const email_verified = profile._json.email_verified;
+
+      const user = await Users.create(username, nickname, email, email_verified);
+      await OAuth.insert('google', profile.id, user.id);
+      return done(null, user);
+
+    } catch(e) {
+      return done(e);
+    }
   }
 );

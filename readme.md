@@ -28,7 +28,6 @@ CREATE TABLE users (
     username VARCHAR(16) UNIQUE NOT NULL,
     nickname VARCHAR(16) NOT NULL,
     email VARCHAR(254) UNIQUE NOT NULL,
-    password CHAR(60) NOT NULL,
     email_verified BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -46,6 +45,12 @@ CREATE TABLE securities (
     FOREIGN KEY (security_id) REFERENCES security_descriptions(id)
 );
 
+CREATE TABLE passwords (
+    user_id INT PRIMARY KEY,
+    password CHAR(60) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 CREATE TABLE oauth (
     user_id INT,
     id VARCHAR(100),
@@ -54,8 +59,3 @@ CREATE TABLE oauth (
 	FOREIGN KEY (user_id) REFERENCES users(id)
 );
 ```
-
-## Todo
-* OAuth2 - google
-* PUT   /auth/change-password
-* PUT   /users

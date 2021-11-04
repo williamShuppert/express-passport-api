@@ -8,6 +8,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { sessionConfig } from './config/express-session.js';
+import { errorHandler } from './libs/errors/handler.js';
 
 import authRouter from './routes/auth.js';
 import usersRouter from './routes/users.js';
@@ -26,5 +27,7 @@ app.use(passport.session());
 
 app.use('/auth', authRouter);
 app.use('/users', usersRouter);
+
+app.use(errorHandler());
 
 app.listen(port, () => console.log(`http://localhost:${port}`));

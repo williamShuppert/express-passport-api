@@ -12,7 +12,11 @@ passport.serializeUser((user, done) => {
 });
   
 passport.deserializeUser(async (id, done) => {
-    const user = await Users.getById(id);
-    if (!user) return done(null, false);
-    done(null, user);
+    try {
+        const user = await Users.getById(id);
+        if (!user) return done(null, false);
+        done(null, user);
+    } catch(e) {
+        done(e);
+    }
 });

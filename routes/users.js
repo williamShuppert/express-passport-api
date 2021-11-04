@@ -2,9 +2,10 @@
 import { Router } from 'express';
 import { Users } from '../models/users.js';
 import { body, param, validationResult } from 'express-validator';
-import { hasSecurity } from '../middleware/auth.js';
+import { hasSecurity, isAuthed } from '../middleware/auth.js';
 import { Securities } from '../models/securities.js';
 import passport from 'passport';
+import { Passwords } from '../models/passwords.js';
 
 const router = new Router();
 
@@ -12,13 +13,17 @@ router.delete('/:id/securities/:security_id', [
     param('id').isNumeric().withMessage('must be numeric'),
     param('security_id').isNumeric().withMessage('must be numeric'),
     hasSecurity(Securities.TYPE.admin)
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-    const { id, security_id } = req.params;
-    await Securities.revoke(id, security_id);
-    res.sendStatus(200);
+], async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    
+        const { id, security_id } = req.params;
+        await Securities.revoke(id, security_id);
+        res.sendStatus(200);
+    } catch(e) {
+        next(e);
+    }
 });
 
 router.get('/:id/securities', [
@@ -57,13 +62,36 @@ router.post('/:id/securities', [
 
 router.get('/:id', [
     param('id').isNumeric().withMessage('must be numeric')
-], async (req, res) => {
-    const { id } = req.params;
-    const user = await Users.getById(id);
+], async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    if (!user) return res.sendStatus(404);
+        const { id } = req.params;
+        const user = await Users.getById(id);
+    
+        if (!user) return res.sendStatus(404);
+    
+        res.status(200).json(await user.toDTO());
+    } catch(e) {
+        next(e);
+    }
+});
 
-    res.status(200).json(await user.toDTO());
+router.put('/password', [
+    body('password').isStrongPassword({ minLength: 6, minSymbols: 1, minNumbers: 1, minUppercase: 1, minUppercase: 1 }).withMessage("not strong enough")
+], async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+        const { password } = req.body;
+
+        await Passwords.update(req.user.id, password);
+        res.sendStatus(200);
+    } catch(e) {
+        next(e);
+    }
 });
 
 router.get('/', (req, res) => {
@@ -76,34 +104,59 @@ router.post('/', [
     body('password').isStrongPassword({ minLength: 6, minSymbols: 1, minNumbers: 1, minUppercase: 1, minUppercase: 1 }).withMessage("not strong enough"),
     body('email').isEmail().withMessage("invalid")
 ], async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-    const { username, nickname, email, password } = req.body;
     try {
-        const user = await Users.create({ username, nickname, email, password });
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+        const { username, nickname, email, password } = req.body;
+
+        const user = await Users.create(username, nickname, email);
+        await Passwords.insert(password, user.id);
 
         req.login(user, async err => {
             if (err) return next(err);
             res.status(200).json(await user.toDTO());
         });
-    } catch(err) {
-        if (err === 'username already in use')
-            return res.status(400).json({ message: 'username already in use'});       
-        else if (err === 'email already in use')
-            return res.status(400).json({ message: 'email already in use'});
-
-        console.log(err);
-        return res.sendStatus(500);
+    } catch(e) {
+        return next(e);
     } 
 });
 
-router.delete('/', passport.authenticate('local'), (req, res) => {
-    Securities.delete(req.user.id);
-    Users.delete(req.user.id);
+router.put('/', [
+    isAuthed(),
+    body('username').notEmpty().withMessage("can't be empty"),
+    body('nickname').notEmpty().withMessage("can't be empty"),
+    body('email').isEmail().withMessage("invalid")
+], async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    req.logout();
-    res.sendStatus(200);
+        const { username, nickname, email } = req.body;
+
+        req.user.username = username;
+        req.user.nickname = nickname;
+        if (req.user.email !== email) req.user.setEmail(email);
+        
+        await req.user.update();
+    
+        res.status(200).json(await req.user.toDTO());
+    } catch(e) {
+        next(e);
+    }
+});
+
+router.delete('/', passport.authenticate('local'), (req, res, next) => {
+    try {
+        Passwords.delete(req.user.id);
+        Securities.delete(req.user.id);
+        Users.delete(req.user.id);
+    
+        req.logout();
+        res.sendStatus(200);
+    } catch(e) {
+        next(e);
+    }
 });
 
 export default router;

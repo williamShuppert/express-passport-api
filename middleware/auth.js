@@ -6,6 +6,6 @@ export const isAuthed = () => (req, res, next) => {
 }
 
 export const hasSecurity = (securities) => [ isAuthed(), async (req, res, next) => {
-    if (await req.user.hasSecurity(securities)) return next();
+    if (await req.user.securities()) return next();
     res.sendStatus(403);
 }];

@@ -5,8 +5,8 @@ import { isAuthed } from '../middleware/auth.js';
 
 const router = new Router();
 
-router.get('/google/callback', passport.authenticate('google', { failureMessage: "login failed" }), (req, res) => {
-    res.status(200);
+router.get('/google/callback', passport.authenticate('google'), async (req, res) => {
+    res.status(200).json(await req.user.toDTO(true));
 });
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));

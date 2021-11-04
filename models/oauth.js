@@ -1,8 +1,17 @@
+'use strict';
 import db from "../config/mysql.js";
 
 export class OAuth {
+    constructor(sqlRes) {
+        this.id = sqlRes.id;
+        this.provider = sqlRes.provider;
+        this.user_id = sqlRes.user_id;
+    }
+
     static async get(provider, id) {
-        return await db('SELECT * FROM oauth JOIN users ON oauth.user_id = users.id WHERE provider = ? AND oauth.id = ?', [provider, id], true);
+        const sqlRes = await db('SELECT * FROM oauth WHERE provider = ? AND oauth.id = ?', [provider, id], true);
+        if (!sqlRes) return undefined;
+        return new OAuth(sqlRes);
     }
 
     static async insert(provider, id, user_id) {
