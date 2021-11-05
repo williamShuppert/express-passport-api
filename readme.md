@@ -1,3 +1,6 @@
+# Express/Passport API template 🔌
+An API using Node, Express.js, Passport.js, and MySQL. Uses both local and google oauth2.0 for authentication.
+
 ## Setup
 * ```npm i```
 * add and fill out .env file in root dir from below template
