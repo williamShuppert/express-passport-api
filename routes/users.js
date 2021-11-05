@@ -6,18 +6,17 @@ import { hasSecurity, isAuthed } from '../middleware/auth.js';
 import { Securities } from '../models/securities.js';
 import passport from 'passport';
 import { Passwords } from '../models/passwords.js';
+import { catchValidationErrors, validPassword, validUser } from '../middleware/validators.js';
 
 const router = new Router();
 
 router.delete('/:id/securities/:security_id', [
     param('id').isNumeric().withMessage('must be numeric'),
     param('security_id').isNumeric().withMessage('must be numeric'),
+    catchValidationErrors(),
     hasSecurity(Securities.TYPE.admin)
 ], async (req, res, next) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-    
         const { id, security_id } = req.params;
         await Securities.revoke(id, security_id);
         res.sendStatus(200);
@@ -28,10 +27,9 @@ router.delete('/:id/securities/:security_id', [
 
 router.get('/:id/securities', [
     param('id').isNumeric().withMessage('must be numeric'),
+    catchValidationErrors(),
     hasSecurity(Securities.TYPE.admin)
 ], async (req, res) => { // or isSelf('id')
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const { id } = req.params;
 
@@ -41,10 +39,9 @@ router.get('/:id/securities', [
 router.post('/:id/securities', [
     param('id').isNumeric().withMessage('must be numeric'),
     body('security_id').isNumeric().withMessage('must be numeric'),
+    catchValidationErrors(),
     hasSecurity(Securities.TYPE.admin)
 ], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const { id } = req.params;
     const { security_id } = req.body;
@@ -61,12 +58,10 @@ router.post('/:id/securities', [
 });
 
 router.get('/:id', [
-    param('id').isNumeric().withMessage('must be numeric')
+    param('id').isNumeric().withMessage('must be numeric'),
+    catchValidationErrors()
 ], async (req, res, next) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
         const { id } = req.params;
         const user = await Users.getById(id);
     
@@ -78,13 +73,8 @@ router.get('/:id', [
     }
 });
 
-router.put('/password', [
-    body('password').isStrongPassword({ minLength: 6, minSymbols: 1, minNumbers: 1, minUppercase: 1, minUppercase: 1 }).withMessage("not strong enough")
-], async (req, res, next) => {
+router.put('/password', [validPassword(), catchValidationErrors()], async (req, res, next) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
         const { password } = req.body;
 
         await Passwords.update(req.user.id, password);
@@ -98,16 +88,8 @@ router.get('/', (req, res) => {
     res.status(200).json({ message: "not implemented" });
 });
 
-router.post('/', [
-    body('username').notEmpty().withMessage("can't be empty"),
-    body('nickname').notEmpty().withMessage("can't be empty"),
-    body('password').isStrongPassword({ minLength: 6, minSymbols: 1, minNumbers: 1, minUppercase: 1, minUppercase: 1 }).withMessage("not strong enough"),
-    body('email').isEmail().withMessage("invalid")
-], async (req, res, next) => {
+router.post('/', validUser(), async (req, res, next) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
         const { username, nickname, email, password } = req.body;
 
         const user = await Users.create(username, nickname, email);
