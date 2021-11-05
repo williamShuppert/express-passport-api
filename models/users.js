@@ -16,6 +16,7 @@ export class Users {
     }
 
     static async getByUsername(username, includeCredentials) {
+        // remove includeCredentials
         const sqlRes = includeCredentials ?
             await db('SELECT * FROM users JOIN passwords ON users.id = passwords.user_id WHERE users.username = ?', [username], true):
             await db('SELECT * FROM users WHERE username = ?', [username], true);

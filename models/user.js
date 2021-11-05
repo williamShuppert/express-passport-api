@@ -10,16 +10,16 @@ export class User {
         this.email = sqlRes.email;
         this.email_verified = sqlRes.email_verified;
         this.created_at = sqlRes.created_at;
-        this.password = sqlRes.password;
-        this._securities = undefined;
-        this._roles = undefined;
+        // this.password = sqlRes.password;
+        // this._securities = undefined;
+        // this._roles = undefined;
     }
 
-    async securities() {
-        if (!this._securities)
-            this._securities = await Securities.getByUserId(this.id);
-        return this._securities;
-    }
+    // async securities() {
+    //     if (!this._securities)
+    //         this._securities = await Securities.getByUserId(this.id);
+    //     return this._securities;
+    // }
 
     setEmail(email) {
         this.email_verified = false;
@@ -55,7 +55,7 @@ export class User {
             nickname: this.nickname,
             created_at: this.created_at
         }
-        if (security) dto.securities = await this.getSecurities();
+        // if (security) dto.securities = await this.getSecurities();
         return dto;
     }
 }
